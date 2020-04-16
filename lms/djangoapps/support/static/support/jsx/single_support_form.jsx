@@ -21,15 +21,39 @@ class RenderForm extends React.Component {
       currentRequest: null,
       errorList: [],
       success: false,
+      show_details: true,
     };
     this.submitForm = this.submitForm.bind(this);
+    this.reDirectUser = this.reDirectUser.bind(this);
     this.setErrorState = this.setErrorState.bind(this);
+    this.setDisplay = this.setDisplay.bind(this);
   }
 
   setErrorState(errors) {
     this.setState({
       errorList: errors,
     });
+  }
+  setDisplay(event){
+   event.target.value === "Course Content" ? this.setState({
+            show_details: false,
+          }) : this.setState({
+            show_details: true,
+          })
+
+  }
+
+  setDisplay(event) {
+    event.target.value === "Course Content" ? this.setState({
+            show_details: false,
+          }) : this.setState({
+            show_details: true,
+          })
+
+  }
+
+  reDirectUser(){
+
   }
 
   submitForm() {
@@ -136,7 +160,10 @@ class RenderForm extends React.Component {
         userInformation={this.props.context.user}
         submitFormUrl={this.props.context.submitFormUrl}
         setErrorState={this.setErrorState}
+        setDisplay={this.setDisplay}
         submitForm={this.submitForm}
+        showDisplay={this.state.show_details}
+        reDirectUser={this.reDirectUser}
       />);
     } else {
       userElement = (<LoggedOutUser
