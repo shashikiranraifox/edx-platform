@@ -521,6 +521,7 @@ class AccountSettingsOnCreationTest(CreateAccountMixin, TestCase):
             'mailing_address': u'',
             'year_of_birth': None,
             'country': None,
+            'state': None,
             'social_links': [],
             'bio': None,
             'profile_image': {
