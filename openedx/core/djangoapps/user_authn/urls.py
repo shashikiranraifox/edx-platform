@@ -20,4 +20,6 @@ urlpatterns += [
         {'initial_mode': 'login'}, name='signin_user'),
     url(r'^register$', login_form.login_and_registration_form,
         {'initial_mode': 'register'}, name='register_user'),
+    url(r'^password_assisstance$', login_form.login_and_registration_form,
+        {'initial_mode': 'reset'}, name='password_assisstance'),
 ]
