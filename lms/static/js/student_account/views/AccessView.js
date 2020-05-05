@@ -128,7 +128,7 @@
                 },
 
                 loadForm: function(type) {
-                var loadFunc;
+                    var loadFunc;
                     if (type === 'reset') {
                         loadFunc = _.bind(this.load.login, this);
                         loadFunc(this.formDescriptions.login);
