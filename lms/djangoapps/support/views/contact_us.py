@@ -45,6 +45,5 @@ class ContactUsView(View):
                 tags.append('enterprise_learner')
 
         context['tags'] = tags
-        
 
         return render_to_response("support/contact_us.html", context)

@@ -5,6 +5,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { StatusAlert } from '@edx/paragon';
 
 import StringUtils from 'edx-ui-toolkit/js/utils/string-utils';
 
@@ -17,16 +18,23 @@ import Success from './success';
 class RenderForm extends React.Component {
   constructor(props) {
     super(props);
+    this.userInformation = this.props.context.user;
     this.state = {
       currentRequest: null,
       errorList: [],
       success: false,
-      show_details: true,
+      formData: {
+        subject: '',
+        course: this.userInformation.course_id,
+        message: '',
+      },
     };
     this.submitForm = this.submitForm.bind(this);
     this.reDirectUser = this.reDirectUser.bind(this);
     this.setErrorState = this.setErrorState.bind(this);
-    this.setDisplay = this.setDisplay.bind(this);
+    this.formOnChangeCallback = this.formOnChangeCallback.bind(this);
+    this.showWarningMessage = this.showWarningMessage.bind(this);
+    this.showDiscussionButton = this.showDiscussionButton.bind(this);
   }
 
   setErrorState(errors) {
@@ -34,48 +42,49 @@ class RenderForm extends React.Component {
       errorList: errors,
     });
   }
-  setDisplay(event){
-   event.target.value === "Course Content" ? this.setState({
-            show_details: false,
-          }) : this.setState({
-            show_details: true,
-          })
 
+  formOnChangeCallback(event) {
+    const eventTarget = event.target;
+    let formData = this.state.formData;
+    formData[eventTarget.id] = eventTarget.value;
+    this.setState({ formData });
   }
 
-  setDisplay(event) {
-    event.target.value === "Course Content" ? this.setState({
-            show_details: false,
-          }) : this.setState({
-            show_details: true,
-          })
-
+  showWarningMessage() {
+    return this.state.formData && this.state.formData.subject === 'Course Content';
   }
 
-  reDirectUser(){
-
+  showDiscussionButton() {
+    const selectCourse = this.state.formData.course;
+    return this.state.formData && (selectCourse !== '' && selectCourse !== 'Not specific to a course');
   }
 
-  submitForm() {
+  reDirectUser(event) {
+    event.preventDefault();
+    window.location.href = `/courses/${this.state.formData.course}/discussion/forum`;
+  }
+
+  submitForm(event) {
+    event.preventDefault();
+    let subject,
+      course;
     const url = this.props.context.submitFormUrl,
-      $userInfo = $('.user-info'),
       request = new XMLHttpRequest(),
       $course = $('#course'),
-      $topic = $('#topic'),
+      $subject = $('#subject'),
       data = {
         comment: {
-          body: $('#message').val(),
+          body: this.state.formData.message,
         },
         tags: this.props.context.tags,
       },
       errors = [];
 
-    let course;
     this.clearErrors();
 
     data.requester = {
-      email: $userInfo.data('email'),
-      name: $userInfo.data('username'),
+      email: this.userInformation.email,
+      name: this.userInformation.username,
     };
 
     course = $course.find(':selected').val();
@@ -90,17 +99,15 @@ class RenderForm extends React.Component {
       id: this.props.context.customFields.course_id,
       value: course,
     }];
-
-    let topic;
-    topic = $topic.find(':selected').val();
-    if (!topic) {
-      topic = $topic.val();
+    subject = $subject.find(':selected').val();
+    if (!subject) {
+      subject = $subject.val();
     }
-    if (!topic) {
-      $('#topic').closest('.form-group').addClass('has-error');
-      errors.push(gettext('Select a topic for your support request.'));
+    if (!subject) {
+      $subject.closest('.form-group').addClass('has-error');
+      errors.push(gettext('Select a subject for your support request.'));
     }
-    data.subject = topic; // Zendesk API requires 'subject'
+    data.subject = subject; // Zendesk API requires 'subject'
 
     if (this.validateData(data, errors)) {
       request.open('POST', url, true);
@@ -148,21 +155,20 @@ class RenderForm extends React.Component {
         platformName={this.props.context.platformName}
         homepageUrl={this.props.context.homepageUrl}
         dashboardUrl={this.props.context.dashboardUrl}
-        isLoggedIn={this.props.context.user !== undefined}
+        isLoggedIn={this.userInformation !== undefined}
       />
     );
   }
 
   renderSupportForm() {
     let userElement;
-    if (this.props.context.user) {
+    if (this.userInformation) {
       userElement = (<LoggedInUser
-        userInformation={this.props.context.user}
-        submitFormUrl={this.props.context.submitFormUrl}
-        setErrorState={this.setErrorState}
-        setDisplay={this.setDisplay}
+        userInformation={this.userInformation}
+        onChangeCallback={this.formOnChangeCallback}
         submitForm={this.submitForm}
-        showDisplay={this.state.show_details}
+        showWarning={this.showWarningMessage()}
+        showDiscussionButton={this.showDiscussionButton()}
         reDirectUser={this.reDirectUser}
       />);
     } else {
