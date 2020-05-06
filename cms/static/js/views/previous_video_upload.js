@@ -43,7 +43,7 @@ define(
                 this.VideoStatusView = new VideoStatusView({
                     status: this.model.get('status'),
                     showError: !this.model.get('transcription_status'),
-                    errorDescription: this.model.get('error_description'),
+                    errorDescription: this.model.get('error_description')
                 });
             },
 
@@ -64,7 +64,7 @@ define(
                     this.videoThumbnailView.setElement(this.$('.thumbnail-col')).render();
                 }
                 this.videoTranscriptsView.setElement(this.$('.transcripts-col')).render();
-                this.VideoStatusView.setElement(this.$('.status-col')).render()
+                this.VideoStatusView.setElement(this.$('.status-col')).render();
                 return this;
             },
 
