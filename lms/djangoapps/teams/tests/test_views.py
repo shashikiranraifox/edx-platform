@@ -2496,7 +2496,7 @@ class TestBulkMembershipManagement(TeamAPITestCase):
         # This strategy allows us to test with invalid course IDs
         return reverse('team_membership_bulk_management', args=[course_id])
 
-    def test_upload_valid_csv_simple(self):
+    def test_create_membership_via_upload(self):
         self.create_and_enroll_student(username='a_user')
         csv_content = 'user,mode,topic_0' + '\n'
         csv_content += 'a_user,audit,team wind power'
@@ -2657,3 +2657,90 @@ class TestBulkMembershipManagement(TeamAPITestCase):
         )
         response_text = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_text['errors'][0], 'Team {} is full.'.format(team1))
+
+    def test_deletion_via_upload_csv(self):
+        # create a team membership that will be used further down
+        self.test_create_membership_via_upload()
+        username = 'a_user'
+        topic_0_id = 'topic_0'
+        self.assertTrue(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id
+        ).exists())
+
+        csv_content = 'user,mode,{},topic_1'.format(topic_0_id) + '\n'
+        csv_content += '{},audit'.format(username)
+        csv_file = SimpleUploadedFile('test_file.csv', csv_content.encode('utf8'), content_type='text/csv')
+        self.client.login(username=self.users['course_staff'].username, password=self.users['course_staff'].password)
+        self.make_call(
+            reverse('team_membership_bulk_management', args=[self.good_course_id]),
+            201,
+            method='post',
+            data={'csv': csv_file},
+            user='staff'
+        )
+        self.assertFalse(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id
+        ).exists())
+
+    def test_reassignment_via_upload_csv(self):
+        # create a team membership that will be used further down
+        self.test_create_membership_via_upload()
+        username = 'a_user'
+        topic_0_id = 'topic_0'
+        nuclear_team_name = 'team nuclear power'
+        windpower_team_name = 'team wind power'
+        self.assertTrue(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id,
+            team__name=windpower_team_name
+        ).exists())
+        csv_content = 'user,mode,{}'.format(topic_0_id) + '\n'
+        csv_content += '{0},audit,{1}'.format(username, nuclear_team_name)
+        csv_file = SimpleUploadedFile('test_file.csv', csv_content.encode('utf8'), content_type='text/csv')
+        self.client.login(username=self.users['course_staff'].username, password=self.users['course_staff'].password)
+        self.make_call(
+            reverse('team_membership_bulk_management', args=[self.good_course_id]),
+            201,
+            method='post',
+            data={'csv': csv_file},
+            user='staff'
+        )
+        self.assertFalse(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id,
+            team__name=windpower_team_name
+        ).exists())
+        self.assertTrue(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id,
+            team__name=nuclear_team_name
+        ).exists())
+
+    def test_upload_file_not_changed_csv(self):
+        # create a team membership that will be used further down
+        self.test_create_membership_via_upload()
+        username = 'a_user'
+        topic_0_id = 'topic_0'
+        nuclear_team_name = 'team wind power'
+        self.assertEqual(len(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__topic_id=topic_0_id
+        )), 1)
+        csv_content = 'user,mode,{}'.format(topic_0_id) + '\n'
+        csv_content += '{0},audit,{1}'.format(username, nuclear_team_name)
+        csv_file = SimpleUploadedFile('test_file.csv', csv_content.encode('utf8'), content_type='text/csv')
+        self.client.login(username=self.users['course_staff'].username,
+                          password=self.users['course_staff'].password)
+        self.make_call(
+            reverse('team_membership_bulk_management', args=[self.good_course_id]),
+            201,
+            method='post',
+            data={'csv': csv_file},
+            user='staff'
+        )
+        self.assertEqual(len(CourseTeamMembership.objects.filter(
+            user_id=self.users[username].id,
+            team__name=nuclear_team_name
+        )), 1)

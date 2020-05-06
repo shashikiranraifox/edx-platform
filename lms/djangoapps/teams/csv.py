@@ -151,7 +151,7 @@ class TeamMembershipImportManager(object):
                 row['user'] = None
                 continue
             row['user'] = user
-
+            self.remove_user_from_team_for_reassignment(row)
             if not self.validate_user_assignment_to_team_and_teamset(row):
                 return False
             row_dictionaries.append(row)
@@ -171,7 +171,7 @@ class TeamMembershipImportManager(object):
         for membership in CourseTeamMembership.get_memberships(course_ids=[self.course.id]):
             user_id = membership.user_id
             teamset_id = membership.team.topic_id
-            self.existing_course_team_memberships[(user_id, teamset_id)] = membership.team.id
+            self.existing_course_team_memberships[(user_id, teamset_id)] = membership.team
 
     def load_course_teams(self):
         """
@@ -320,6 +320,46 @@ class TeamMembershipImportManager(object):
                 return False
         self.user_count_by_team[(teamset_id, team_name)] += 1
         return True
+
+    def remove_user_from_team_for_reassignment(self, row):
+        """
+        Remove a user from a team if:
+        a. The user's current team is different from the team specified in csv for the same teamset (this user will
+           then be assigned to a new team in 'add_user_to_team`.
+        b. The team value in the CSV is blank - the user should be removed from the current team in teamset.
+        Also, if there is no change in user's membership, the input row's team name will be nulled out so that no
+        action will take place further in the processing chain.
+        """
+        for ts_id in self.teamset_ids:
+            if row[ts_id] is None:
+                # remove this student from the teamset
+                try:
+                    membership = CourseTeamMembership.objects.get(
+                        user_id=row['user'].id,
+                        team__topic_id=ts_id
+                    )
+                    membership.delete()
+                except CourseTeamMembership.DoesNotExist:
+                    pass
+            else:
+                # reassignment happens only if proposed team membership is different from existing team membership
+                if (row['user'].id, ts_id) in self.existing_course_team_memberships:
+                    current_user_teams_name = self.existing_course_team_memberships[row['user'].id, ts_id].name
+                    if current_user_teams_name != row[ts_id]:
+                        try:
+                            membership = CourseTeamMembership.objects.get(
+                                user_id=row['user'].id,
+                                team__topic_id=ts_id
+                            )
+                            membership.delete()
+                            del self.existing_course_team_memberships[row['user'].id, ts_id]
+                            self.user_ids_by_teamset_id[ts_id].remove(row['user'].id)
+                        except CourseTeamMembership.DoesNotExist:
+                            pass
+                    else:
+                        # the user will remain in the same team. In order to avoid validation/attempting
+                        # to readd the user, null out the team name
+                        row[ts_id] = None
 
     def add_error_and_check_if_max_exceeded(self, error_message):
         """
