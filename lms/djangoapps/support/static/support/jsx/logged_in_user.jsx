@@ -78,11 +78,7 @@ function LoggedInUser({ userInformation, onChangeCallback, submitForm, showWarni
           <div className="col-sm-12">
             <div className="form-group">
               <p>
-                While our support team is happy to assist with the edX platform,
-                the course staff has the expertise for specific assignment questions
-                , grading or the proper procedures in each course.
-                Please post all course related questions within the Discussion
-                Forum where the Course Staff can directly respond.
+                {gettext('While our support team is happy to assist with the edX platform, the course staff has the expertise for specific assignment questions, grading or the proper procedures in each course. Please post all course related questions within the Discussion Forum where the Course Staff can directly respond.')}
               </p>
             </div>
           </div>
@@ -98,15 +94,17 @@ function LoggedInUser({ userInformation, onChangeCallback, submitForm, showWarni
             <div className="form-group">
               <label htmlFor="message">{gettext('Details')}</label>
               <p className="message-desc">{gettext('the more quickly and helpfully we can respond!')}</p>
-              <textarea aria-describedby="message" className="form-control" rows="7" id="message"/>
+              <textarea aria-describedby="message" className="form-control" rows="7" id="message" />
             </div>
           </div>
         </div>
         <div className="row">
           <div className="col-sm-12">
-            <button
-              className="btn btn-primary btn-submit"
-            >{gettext('Create Support Ticket')}</button>
+            <Button
+              className={['btn', 'btn-primary', 'btn-submit']}
+              type="submit"
+              label={gettext('Create Support Ticket')}
+            />
           </div>
         </div>
       </div>
@@ -162,7 +160,12 @@ LoggedInUser.propTypes = {
   submitForm: PropTypes.func.isRequired,
   onChangeCallback: PropTypes.func.isRequired,
   reDirectUser: PropTypes.func.isRequired,
-  userInformation: PropTypes.arrayOf(PropTypes.object).isRequired,
+  userInformation: PropTypes.shape({
+    course_id: PropTypes.string,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    enrollments: PropTypes.arrayOf(PropTypes.object),
+  }).isRequired,
   showWarning: PropTypes.bool.isRequired,
   showDiscussionButton: PropTypes.bool.isRequired,
 };
