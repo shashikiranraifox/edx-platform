@@ -22,6 +22,8 @@
     <%static:include path="js/${template_name}.underscore" />
   </script>
 % endfor
+<script src="https://cdn.tiny.cloud/1/sznt1s6774ejgd6h25wkp8s55u3e96aznf1c5qq1jdevi25m/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
 </%block>
 
 <%block name="jsextra">
@@ -203,9 +205,9 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url | n, js_escaped_string}'
             </ol>
           </fieldset>
         </div>
-        
+
         <hr class="divide" />
-        
+
         <div id="schedule" class="group-settings schedule">
           <header>
             <h2 class="title-2">${_('Course Schedule')}</h2>

@@ -72,6 +72,32 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                        el: $('.course-instructor-details-fields'),
                        model: this.model
                    });
+                   cachethis = this;
+                   tinymce.init({
+                        selector: "textarea#course-overview",
+                        setup: function(editor) {
+                        editor.on('change', function(e){
+                            var newVal = tinymce.activeEditor.getContent();
+
+                            if (cachethis.model.get('overview') != newVal){
+                                 cachethis.setAndValidate('overview', newVal);
+                            }
+                        });
+                    },
+                    plugins: ["code image preview"],
+                        menu: {
+                            file: {title: 'File', items: 'save'},
+                            edit: {title: 'Edit', items: 'undo redo | cut copy paste | selectall'},
+                            insert: {title: 'Insert', items: '|'},
+                            view: {title: 'View', items: 'visualaid preview'},
+                            format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
+                            tools: {title: 'Tools', items: 'inserttable code'}
+                        },
+                        toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table | code | preview",
+                    });
+
+
+
                },
 
                render: function() {
@@ -85,7 +111,7 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    DateUtils.setupDatePicker('enrollment_end', this);
 
                    this.$el.find('#' + this.fieldToSelectorMap.overview).val(this.model.get('overview'));
-                   this.codeMirrorize(null, $('#course-overview')[0]);
+                   //this.codeMirrorize(null, $('#course-overview')[0]);
 
                    if (this.model.get('title') !== '') {
                        this.$el.find('#' + this.fieldToSelectorMap.title).val(this.model.get('title'));
