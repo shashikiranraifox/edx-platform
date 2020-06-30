@@ -15,7 +15,7 @@ from ratelimitbackend import admin
 from branding import views as branding_views
 from debug import views as debug_views
 from lms.djangoapps.certificates import views as certificates_views
-from lms.djangoapps.courseware.masquerade import handle_ajax as courseware_masquerade_handle_ajax
+from lms.djangoapps.courseware.masquerade import MasqueradeView
 from lms.djangoapps.courseware.module_render import (
     handle_xblock_callback,
     handle_xblock_callback_noauth,
@@ -57,6 +57,7 @@ from util import views as util_views
 
 RESET_COURSE_DEADLINES_NAME = 'reset_course_deadlines'
 RENDER_XBLOCK_NAME = 'render_xblock'
+COURSE_DATES_NAME = 'dates'
 
 if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):
     django_autodiscover()
@@ -486,7 +487,7 @@ urlpatterns += [
             settings.COURSE_ID_PATTERN,
         ),
         courseware_views.dates,
-        name='dates',
+        name=COURSE_DATES_NAME,
     ),
 
     # Takes optional student_id for instructor use--shows profile as that student sees it.
@@ -720,7 +721,7 @@ if settings.FEATURES.get('ENABLE_MASQUERADE'):
             r'^courses/{}/masquerade$'.format(
                 settings.COURSE_KEY_PATTERN,
             ),
-            courseware_masquerade_handle_ajax,
+            MasqueradeView.as_view(),
             name='masquerade_update',
         ),
     ]
@@ -998,3 +999,8 @@ if 'openedx.testing.coverage_context_listener' in settings.INSTALLED_APPS:
     ]
 
 urlpatterns.extend(plugin_urls.get_patterns(plugin_constants.ProjectType.LMS))
+
+# Course Home API urls
+urlpatterns += [
+    url(r'^api/course_home/', include('lms.djangoapps.course_home_api.urls')),
+]

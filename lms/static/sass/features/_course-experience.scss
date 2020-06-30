@@ -319,6 +319,10 @@
 
 // Course outline for visual progress waffle switch
 .course-outline {
+  .dates-banner-wrapper {
+    display: none;
+  }
+
   .block-tree {
     margin: 0;
     padding: 0;
@@ -388,7 +392,6 @@
           margin: 0 0 0 35px;
 
           .subsection-title {
-            display: inline-block;
             margin: 0;
             font-weight: $font-regular;
             display: inline;

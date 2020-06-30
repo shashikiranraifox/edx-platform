@@ -500,6 +500,64 @@ class UserProfile(models.Model):
     mailing_address = models.TextField(blank=True, null=True)
     city = models.TextField(blank=True, null=True)
     country = CountryField(blank=True, null=True)
+    COUNTRY_WITH_STATES = u'US'
+    STATE_CHOICES = (
+        ('AL', 'Alabama'),
+        ('AK', 'Alaska'),
+        ('AZ', 'Arizona'),
+        ('AR', 'Arkansas'),
+        ('AA', 'Armed Forces Americas'),
+        ('AE', 'Armed Forces Europe'),
+        ('AP', 'Armed Forces Pacific'),
+        ('CA', 'California'),
+        ('CO', 'Colorado'),
+        ('CT', 'Connecticut'),
+        ('DE', 'Delaware'),
+        ('DC', 'District Of Columbia'),
+        ('FL', 'Florida'),
+        ('GA', 'Georgia'),
+        ('HI', 'Hawaii'),
+        ('ID', 'Idaho'),
+        ('IL', 'Illinois'),
+        ('IN', 'Indiana'),
+        ('IA', 'Iowa'),
+        ('KS', 'Kansas'),
+        ('KY', 'Kentucky'),
+        ('LA', 'Louisiana'),
+        ('ME', 'Maine'),
+        ('MD', 'Maryland'),
+        ('MA', 'Massachusetts'),
+        ('MI', 'Michigan'),
+        ('MN', 'Minnesota'),
+        ('MS', 'Mississippi'),
+        ('MO', 'Missouri'),
+        ('MT', 'Montana'),
+        ('NE', 'Nebraska'),
+        ('NV', 'Nevada'),
+        ('NH', 'New Hampshire'),
+        ('NJ', 'New Jersey'),
+        ('NM', 'New Mexico'),
+        ('NY', 'New York'),
+        ('NC', 'North Carolina'),
+        ('ND', 'North Dakota'),
+        ('OH', 'Ohio'),
+        ('OK', 'Oklahoma'),
+        ('OR', 'Oregon'),
+        ('PA', 'Pennsylvania'),
+        ('RI', 'Rhode Island'),
+        ('SC', 'South Carolina'),
+        ('SD', 'South Dakota'),
+        ('TN', 'Tennessee'),
+        ('TX', 'Texas'),
+        ('UT', 'Utah'),
+        ('VT', 'Vermont'),
+        ('VA', 'Virginia'),
+        ('WA', 'Washington'),
+        ('WV', 'West Virginia'),
+        ('WI', 'Wisconsin'),
+        ('WY', 'Wyoming'),
+    )
+    state = models.CharField(blank=True, null=True, max_length=2, choices=STATE_CHOICES)
     goals = models.TextField(blank=True, null=True)
     allow_certificate = models.BooleanField(default=1)
     bio = models.CharField(blank=True, null=True, max_length=3000, db_index=False)
@@ -535,7 +593,7 @@ class UserProfile(models.Model):
         if self.gender:
             return self.__enumerable_to_display(self.GENDER_CHOICES, self.gender)
 
-    def get_meta(self):  # pylint: disable=missing-docstring
+    def get_meta(self):  # pylint: disable=missing-function-docstring
         js_str = self.meta
         if not js_str:
             js_str = dict()
@@ -544,7 +602,7 @@ class UserProfile(models.Model):
 
         return js_str
 
-    def set_meta(self, meta_json):  # pylint: disable=missing-docstring
+    def set_meta(self, meta_json):
         self.meta = json.dumps(meta_json)
 
     def set_login_session(self, session_id=None):
@@ -625,7 +683,7 @@ class UserProfile(models.Model):
 
 
 @receiver(models.signals.post_save, sender=UserProfile)
-def invalidate_user_profile_country_cache(sender, instance, **kwargs):  # pylint:   disable=unused-argument, invalid-name
+def invalidate_user_profile_country_cache(sender, instance, **kwargs):  # pylint:   disable=unused-argument
     """Invalidate the cache of country in UserProfile model. """
 
     changed_fields = getattr(instance, '_changed_fields', {})
@@ -659,7 +717,6 @@ def user_profile_post_save_callback(sender, **kwargs):
     Emit analytics events after saving the UserProfile.
     """
     user_profile = kwargs['instance']
-    # pylint: disable=protected-access
     emit_field_changed_events(
         user_profile,
         user_profile.user,
@@ -714,7 +771,6 @@ def user_post_save_callback(sender, **kwargs):
     # Because `emit_field_changed_events` removes the record of the fields that
     # were changed, wait to do that until after we've checked them as part of
     # the condition on whether we want to check for automatic enrollments.
-    # pylint: disable=protected-access
     emit_field_changed_events(
         user,
         user,
@@ -1126,13 +1182,6 @@ class CourseEnrollment(models.Model):
         ordering = ('user', 'course')
 
     def __init__(self, *args, **kwargs):
-        if 'course_id' in kwargs:
-            course_id = kwargs['course_id']
-            if isinstance(course_id, str):
-                kwargs['course_id'] = CourseKey.from_string(course_id)
-                call_location = "\n".join("%30s : %s:%d" % (t[3], t[1], t[2]) for t in inspect.stack()[::-1])
-                log.warning("Forced to coerce course_id in CourseEnrollment instantiation: %s", call_location)
-
         super(CourseEnrollment, self).__init__(*args, **kwargs)
 
         # Private variable for storing course_overview to minimize calls to the database.
@@ -1243,7 +1292,6 @@ class CourseEnrollment(models.Model):
         Returns a boolean value regarding whether the user has access to enroll in the course. Returns False if the
         enrollment has been closed.
         """
-        # pylint: disable=import-error
         from openedx.core.djangoapps.enrollments.permissions import ENROLL_IN_COURSE
         return not user.has_perm(ENROLL_IN_COURSE, course)
 
@@ -2055,7 +2103,7 @@ class FBEEnrollmentExclusion(models.Model):
 
 @receiver(models.signals.post_save, sender=CourseEnrollment)
 @receiver(models.signals.post_delete, sender=CourseEnrollment)
-def invalidate_enrollment_mode_cache(sender, instance, **kwargs):  # pylint: disable=unused-argument, invalid-name
+def invalidate_enrollment_mode_cache(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """
     Invalidate the cache of CourseEnrollment model.
     """
@@ -2259,7 +2307,7 @@ class CourseAccessRole(models.Model):
         """
         Lexigraphic sort
         """
-        return self._key < other._key  # pylint: disable=protected-access
+        return self._key < other._key
 
     def __str__(self):
         return "[CourseAccessRole] user: {}   role: {}   org: {}   course: {}".format(self.user.username, self.role, self.org, self.course_id)
@@ -2396,7 +2444,7 @@ def create_comments_service_user(user):
 
 
 @receiver(user_logged_in)
-def log_successful_login(sender, request, user, **kwargs):  # pylint: disable=unused-argument
+def log_successful_login(sender, request, user, **kwargs):
     """Handler to log when logins have occurred successfully."""
     if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
         AUDIT_LOG.info(u"Login success - user.id: {0}".format(user.id))
@@ -2405,7 +2453,7 @@ def log_successful_login(sender, request, user, **kwargs):  # pylint: disable=un
 
 
 @receiver(user_logged_out)
-def log_successful_logout(sender, request, user, **kwargs):  # pylint: disable=unused-argument
+def log_successful_logout(sender, request, user, **kwargs):
     """Handler to log when logouts have occurred successfully."""
     if hasattr(request, 'user'):
         if settings.FEATURES['SQUELCH_PII_IN_LOGS']:
@@ -2416,7 +2464,7 @@ def log_successful_logout(sender, request, user, **kwargs):  # pylint: disable=u
 
 @receiver(user_logged_in)
 @receiver(user_logged_out)
-def enforce_single_login(sender, request, user, signal, **kwargs):    # pylint: disable=unused-argument
+def enforce_single_login(sender, request, user, signal, **kwargs):
     """
     Sets the current session id in the user profile,
     to prevent concurrent logins.
@@ -2682,7 +2730,7 @@ class LanguageProficiency(models.Model):
     )
 
 
-class SocialLink(models.Model):  # pylint: disable=model-missing-unicode
+class SocialLink(models.Model):
     """
     Represents a URL connecting a particular social platform to a user's social profile.
 

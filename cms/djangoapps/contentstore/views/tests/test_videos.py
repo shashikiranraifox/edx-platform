@@ -248,7 +248,8 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
                     'status',
                     'course_video_image_url',
                     'transcripts',
-                    'transcription_status'
+                    'transcription_status',
+                    'error_description'
                 ])
             )
             dateutil.parser.parse(response_video['created'])
@@ -264,6 +265,7 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
             [
                 'edx_video_id', 'client_video_id', 'created', 'duration',
                 'status', 'course_video_image_url', 'transcripts', 'transcription_status',
+                'error_description'
             ],
             [
                 {
@@ -280,6 +282,7 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
             [
                 'edx_video_id', 'client_video_id', 'created', 'duration',
                 'status', 'course_video_image_url', 'transcripts', 'transcription_status',
+                'error_description'
             ],
             [
                 {
@@ -721,20 +724,19 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
         status = convert_video_status(video)
         self.assertEqual(status, StatusDisplayStrings.get('youtube_duplicate'))
 
-        # `transcript_ready` should be converted to `file_complete`
-        video['status'] = 'transcript_ready'
-        status = convert_video_status(video)
-        self.assertEqual(status, StatusDisplayStrings.get('file_complete'))
-
-        # The encode status should be converted to `file_complete` if video encodes are complete
+        # The "encode status" should be converted to `file_complete` if video encodes are complete
         video['status'] = 'transcription_in_progress'
         status = convert_video_status(video, is_video_encodes_ready=True)
         self.assertEqual(status, StatusDisplayStrings.get('file_complete'))
 
+        # If encoding is not complete return the status as it is
+        video['status'] = 's3_upload_failed'
+        status = convert_video_status(video)
+        self.assertEqual(status, StatusDisplayStrings.get('s3_upload_failed'))
+
         # for all other status, there should not be any conversion
         statuses = list(StatusDisplayStrings._STATUS_MAP.keys())  # pylint: disable=protected-access
         statuses.remove('invalid_token')
-        statuses.remove('transcript_ready')
         for status in statuses:
             video['status'] = status
             new_status = convert_video_status(video)
@@ -1492,7 +1494,7 @@ class VideoUrlsCsvTestCase(VideoUploadTestMixin, CourseTestCase):
             self.assertEqual(response_video["Video ID"], original_video["edx_video_id"])
             self.assertEqual(response_video["Status"], convert_video_status(original_video))
             for profile in expected_profiles:
-                response_profile_url = response_video["{} URL".format(profile)]  # pylint: disable=unicode-format-string
+                response_profile_url = response_video["{} URL".format(profile)]
                 original_encoded_for_profile = next(
                     (
                         original_encoded
