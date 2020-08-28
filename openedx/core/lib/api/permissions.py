@@ -30,18 +30,14 @@ class ApiKeyHeaderPermission(permissions.BasePermission):
         header_api_key = request.META.get("HTTP_X_EDX_API_KEY")
         if api_key is None:
             print("ApiKeyHeaderPermission, api_key is None")
-            audit_log("ApiKeyHeaderPermission, api_key is None")
         else:
             print("ApiKeyHeaderPermission, API_KEY: " + api_key)
-            audit_log("ApiKeyHeaderPermission, API_KEY is ", api_key)
-
+    
         if header_api_key is None:
             print("ApiKeyHeaderPermission, header_api_key is None")
-            audit_log("ApiKeyHeaderPermission, header_api_key is None")
         else:
             print("ApiKeyHeaderPermission, header_api_key: " + header_api_key)
-            audit_log("ApiKeyHeaderPermission, header_api_key is ", header_api_key)
-
+    
         if api_key is not None and request.META.get("HTTP_X_EDX_API_KEY") == api_key:
             audit_log("ApiKeyHeaderPermission used",
                       path=request.path,
