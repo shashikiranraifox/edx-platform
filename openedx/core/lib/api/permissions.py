@@ -1,6 +1,7 @@
 """
 API library for Django REST Framework permissions-oriented workflows
 """
+import logging
 
 from django.conf import settings
 from django.http import Http404
@@ -12,7 +13,7 @@ from rest_framework import permissions
 from edx_rest_framework_extensions.permissions import IsStaff, IsUserInUrl
 from openedx.core.lib.log_utils import audit_log
 from student.roles import CourseInstructorRole, CourseStaffRole
-
+log = logging.getLogger(__name__)
 
 class ApiKeyHeaderPermission(permissions.BasePermission):
     """
@@ -29,13 +30,17 @@ class ApiKeyHeaderPermission(permissions.BasePermission):
         api_key = getattr(settings, "EDX_API_KEY", None)
         header_api_key = request.META.get("HTTP_X_EDX_API_KEY")
         if api_key is None:
+            log.info('ApiKeyHeaderPermission, api_key is  None')
             print("ApiKeyHeaderPermission, api_key is None")
         else:
+            log.info('ApiKeyHeaderPermission, api_key is  [%s]', api_key)
             print("ApiKeyHeaderPermission, API_KEY: " + api_key)
     
         if header_api_key is None:
+            log.info('ApiKeyHeaderPermission, header_api_key is  None')
             print("ApiKeyHeaderPermission, header_api_key is None")
         else:
+            log.info('ApiKeyHeaderPermission, header_api_key is  [%s]', header_api_key)
             print("ApiKeyHeaderPermission, header_api_key: " + header_api_key)
     
         if api_key is not None and request.META.get("HTTP_X_EDX_API_KEY") == api_key:
