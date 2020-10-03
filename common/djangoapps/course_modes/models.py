@@ -683,14 +683,11 @@ class CourseMode(models.Model):
         modes = cls.modes_for_course(course_id)
         print(modes)
         for mode in modes:
-            if mode.currency.lower() == currency.lower():
-                print("LHS value")
-                print(mode.currency.lower())
-                print("RHS value")
-                print(currency.lower())
-                print("returned value")
-                print(mode.min_price)
-
+            print(" before LHS value")
+            print(mode.currency.lower())
+            print("before RHS value")
+            print(currency.lower())
+            print(mode.min_price)
         return min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower())
 
     @classmethod
