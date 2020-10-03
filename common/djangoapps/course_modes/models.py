@@ -681,7 +681,16 @@ class CourseMode(models.Model):
         If there is no mode found, will return the price of DEFAULT_MODE, which is 0
         """
         modes = cls.modes_for_course(course_id)
-        print(min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower()))
+        print(modes)
+        for mode in modes:
+            if mode.currency.lower() == currency.lower():
+                print("LHS value")
+                print(mode.currency.lower())
+                print("RHS value")
+                print(currency.lower())
+                print("returned value")
+                print(mode.min_price)
+
         return min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower())
 
     @classmethod
