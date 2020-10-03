@@ -77,7 +77,7 @@ class CourseMode(models.Model):
     min_price = models.IntegerField(default=0, verbose_name=_("Price"))
 
     # the currency these prices are in, using lower case ISO currency codes
-    currency = models.CharField(default="inr", max_length=8)
+    currency = models.CharField(default="INR", max_length=8)
 
     # The datetime at which the course mode will expire.
     # This is used to implement "upgrade" deadlines.
@@ -181,7 +181,7 @@ class CourseMode(models.Model):
     # "honor" to "audit", we still need to have the shoppingcart
     # use "honor"
     DEFAULT_SHOPPINGCART_MODE_SLUG = HONOR
-    DEFAULT_SHOPPINGCART_MODE = Mode(HONOR, _('Honor'), 0, '', 'inr', None, None, None, None)
+    DEFAULT_SHOPPINGCART_MODE = Mode(HONOR, _('Honor'), 0, '', 'INR', None, None, None, None)
 
     CACHE_NAMESPACE = u"course_modes.CourseMode.cache."
 
@@ -681,6 +681,7 @@ class CourseMode(models.Model):
         If there is no mode found, will return the price of DEFAULT_MODE, which is 0
         """
         modes = cls.modes_for_course(course_id)
+        print(min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower()))
         return min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower())
 
     @classmethod
@@ -821,7 +822,7 @@ class CourseModesArchive(models.Model):
                                         validators=[validate_comma_separated_integer_list])
 
     # the currency these prices are in, using lower case ISO currency codes
-    currency = models.CharField(default="inr", max_length=8)
+    currency = models.CharField(default="INR", max_length=8)
 
     # turn this mode off after the given expiration date
     expiration_date = models.DateField(default=None, null=True, blank=True)
