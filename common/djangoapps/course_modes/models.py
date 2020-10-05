@@ -763,6 +763,18 @@ def get_cosmetic_display_price(course):
     return get_course_prices(course)[1]
 
 
+logger.info("function zero argument logger")
+logger.info(settings.PAID_COURSE_REGISTRATION_CURRENCY[0])
+print("function zero argument print")
+print(settings.PAID_COURSE_REGISTRATION_CURRENCY[0])
+print("logger print break")
+logger.info("logger logger break")
+logger.info("function not zero argument logger")
+logger.info(settings.PAID_COURSE_REGISTRATION_CURRENCY)
+print("function not zero argument print")
+print(settings.PAID_COURSE_REGISTRATION_CURRENCY)
+
+
 def get_course_prices(course, verified_only=False):
     """
     Return registration_price and cosmetic_display_prices.
@@ -770,6 +782,7 @@ def get_course_prices(course, verified_only=False):
     cosmetic_display_prices is the course price as a string preceded by correct currency, or 'Free'.
     """
     # Find the
+
     if verified_only:
         registration_price = CourseMode.min_course_price_for_verified_for_currency(
             course.id,
