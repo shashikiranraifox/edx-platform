@@ -353,6 +353,8 @@ class CourseMode(models.Model):
         modes = ([mode.to_tuple() for mode in found_course_modes])
         if not modes:
             modes = [cls.DEFAULT_MODE]
+            print(modes)
+            logger.info(modes)
 
         return modes
 
