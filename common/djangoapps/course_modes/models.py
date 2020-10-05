@@ -19,7 +19,8 @@ from opaque_keys.edx.django.models import CourseKeyField
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.cache_utils import request_cached
-
+import logging
+logger = logging.getLogger(__name__)
 Mode = namedtuple('Mode',
                   [
                       'slug',
@@ -682,12 +683,18 @@ class CourseMode(models.Model):
         """
         modes = cls.modes_for_course(course_id)
         print(modes)
+        logger.info(modes)
         for mode in modes:
-            print(" before LHS value")
+            print("before LHS value")
+            logger.info("before LHS value")
             print(mode.currency.lower())
+            logger.info(mode.currency.lower())
             print("before RHS value")
+            logger.info("before RHS value")
             print(currency.lower())
+            logger.info(currency.lower())
             print(mode.min_price)
+            logger.info(mode.min_price)
         return min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower())
 
     @classmethod
