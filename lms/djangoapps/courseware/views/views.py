@@ -829,7 +829,6 @@ def course_about(request, course_id):
                 ecommerce_checkout_link = ecomm_service.get_checkout_page_url(professional_mode.sku)
             if professional_mode.bulk_sku:
                 ecommerce_bulk_checkout_link = ecomm_service.get_checkout_page_url(professional_mode.bulk_sku)
-        logger.info('reached here')
         registration_price, course_price = get_course_prices(course)
 
         # Determine which checkout workflow to use -- LMS shoppingcart or Otto basket
