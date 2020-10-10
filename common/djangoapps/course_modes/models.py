@@ -19,7 +19,8 @@ from opaque_keys.edx.django.models import CourseKeyField
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.cache_utils import request_cached
-
+import logging
+logger = logging.getLogger(__name__)
 Mode = namedtuple('Mode',
                   [
                       'slug',
@@ -77,7 +78,7 @@ class CourseMode(models.Model):
     min_price = models.IntegerField(default=0, verbose_name=_("Price"))
 
     # the currency these prices are in, using lower case ISO currency codes
-    currency = models.CharField(default="usd", max_length=8)
+    currency = models.CharField(default="inr", max_length=8)
 
     # The datetime at which the course mode will expire.
     # This is used to implement "upgrade" deadlines.
@@ -181,7 +182,7 @@ class CourseMode(models.Model):
     # "honor" to "audit", we still need to have the shoppingcart
     # use "honor"
     DEFAULT_SHOPPINGCART_MODE_SLUG = HONOR
-    DEFAULT_SHOPPINGCART_MODE = Mode(HONOR, _('Honor'), 0, '', 'usd', None, None, None, None)
+    DEFAULT_SHOPPINGCART_MODE = Mode(HONOR, _('Honor'), 0, '', 'inr', None, None, None, None)
 
     CACHE_NAMESPACE = u"course_modes.CourseMode.cache."
 
@@ -352,7 +353,7 @@ class CourseMode(models.Model):
         modes = ([mode.to_tuple() for mode in found_course_modes])
         if not modes:
             modes = [cls.DEFAULT_MODE]
-
+   
         return modes
 
     @classmethod
@@ -754,6 +755,7 @@ def get_course_prices(course, verified_only=False):
     cosmetic_display_prices is the course price as a string preceded by correct currency, or 'Free'.
     """
     # Find the
+
     if verified_only:
         registration_price = CourseMode.min_course_price_for_verified_for_currency(
             course.id,
@@ -821,7 +823,7 @@ class CourseModesArchive(models.Model):
                                         validators=[validate_comma_separated_integer_list])
 
     # the currency these prices are in, using lower case ISO currency codes
-    currency = models.CharField(default="usd", max_length=8)
+    currency = models.CharField(default="inr", max_length=8)
 
     # turn this mode off after the given expiration date
     expiration_date = models.DateField(default=None, null=True, blank=True)
