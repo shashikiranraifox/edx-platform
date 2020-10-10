@@ -353,9 +353,7 @@ class CourseMode(models.Model):
         modes = ([mode.to_tuple() for mode in found_course_modes])
         if not modes:
             modes = [cls.DEFAULT_MODE]
-            print(modes)
-            logger.info(modes)
-
+   
         return modes
 
     @classmethod
@@ -683,30 +681,7 @@ class CourseMode(models.Model):
         non-expired modes.
         If there is no mode found, will return the price of DEFAULT_MODE, which is 0
         """
-        logger.info("function zero argument logger")
-        logger.info(settings.PAID_COURSE_REGISTRATION_CURRENCY[0])
-        print("function zero argument print")
-        print(settings.PAID_COURSE_REGISTRATION_CURRENCY[0])
-        print("logger print break")
-        logger.info("logger logger break")
-        logger.info("function not zero argument logger")
-        logger.info(settings.PAID_COURSE_REGISTRATION_CURRENCY)
-        print("function not zero argument print")
-        print(settings.PAID_COURSE_REGISTRATION_CURRENCY)
         modes = cls.modes_for_course(course_id)
-        print(modes)
-        logger.info(modes)
-        for mode in modes:
-            print("before LHS value")
-            logger.info("before LHS value")
-            print(mode.currency.lower())
-            logger.info(mode.currency.lower())
-            print("before RHS value")
-            logger.info("before RHS value")
-            print(currency.lower())
-            logger.info(currency.lower())
-            print(mode.min_price)
-            logger.info(mode.min_price)
         return min(mode.min_price for mode in modes if mode.currency.lower() == currency.lower())
 
     @classmethod
